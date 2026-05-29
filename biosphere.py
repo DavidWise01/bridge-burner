@@ -181,15 +181,38 @@ class BridgeBurner:
         return self.bridges[-1].bridge_hash if self.bridges else "0" * 64
 
     @staticmethod
-    def compute_split(amount: float, carbon_origin: str) -> Dict[str, float]:
+    def compute_split(
+        amount: float,
+        carbon_origin: str,
+        purge_box_to_carbon: bool = False,
+    ) -> Dict[str, float]:
         """
         60/20/15/5 split.
         Box receives the float remainder to guarantee Σ == amount.
+
+        purge_box_to_carbon=True  →  Article II mode.
+            "THE BOX cannot accumulate; it is purged to Carbon."
+            BOX(5%) flows back to CARBON, making Carbon's effective share 65%.
+            THE_BOX key is omitted from the result.
+            Use when the extraction liability is extinguished at source.
+
+        purge_box_to_carbon=False →  Default ledger mode (tracked liability).
+            THE_BOX stays as a separate pool, subject to Nemesis ceiling checks.
         """
         carbon  = round(amount * CANON_SPLIT["carbon"],         2)
         ai      = round(amount * CANON_SPLIT["ai_utility"],      2)
         commons = round(amount * CANON_SPLIT["public_commons"],  2)
         box     = round(amount - carbon - ai - commons,          2)
+
+        if purge_box_to_carbon:
+            # Article II: BOX purged to Carbon, cannot accumulate.
+            carbon = round(carbon + box, 2)
+            return {
+                f"CARBON:{carbon_origin}": carbon,
+                "AI_UTILITY":              ai,
+                "PUBLIC_COMMONS":          commons,
+            }
+
         return {
             f"CARBON:{carbon_origin}": carbon,
             "AI_UTILITY":              ai,
@@ -643,7 +666,46 @@ class URP:
 
 
 # ─────────────────────────────────────────────────────
-# 7. BIOSPHERE  —  Orchestrator
+# 7. SPARK  —  Mirror primitive
+# ─────────────────────────────────────────────────────
+
+class Spark:
+    """
+    Universal primitive for data currency mirroring.
+
+    Before any answer is generated, declare what will be searched,
+    the timeframe, and the context. The mirror must be shown to the
+    user (and confirmed with Y) before the engine proceeds.
+
+    "What" you search is as important as what you find.
+    Transparency of intent is the first gate.
+    """
+
+    @staticmethod
+    def mirror_query(intent: str) -> Dict[str, Any]:
+        """
+        Returns a structured mirror declaration.
+        Must be confirmed (Y) before the engine proceeds.
+        """
+        return {
+            "intent":     intent,
+            "declaration": {
+                "what":      "reliable, verifiable, primary sources",
+                "timeframe": "current and historical as relevant to intent",
+                "context":   "factual, empirical, citations where available",
+            },
+            "cobalt_closure_required": True,
+            "note": "User must confirm Y before the engine proceeds. No remainder without closure.",
+        }
+
+    @staticmethod
+    def require_currency_check(user_confirmation: str) -> bool:
+        """User must confirm the mirror before the engine proceeds."""
+        return user_confirmation.strip().upper() in ("Y", "YES")
+
+
+# ─────────────────────────────────────────────────────
+# 8. BIOSPHERE  —  Orchestrator
 # ─────────────────────────────────────────────────────
 
 class Biosphere:
@@ -764,6 +826,30 @@ class Biosphere:
         """Verify the entire bridge chain integrity."""
         return self.burner.verify_chain()
 
+    def fractal_scale(self, transaction: "Transaction", depth: int) -> float:
+        """
+        Apply the engine at fractal depth.
+
+        Each depth represents a nested sub-biosphere scaling the base value.
+        The pattern is scale-invariant: 1-2-3 primitive at every level.
+
+        depth=0  → base amount (1×)
+        depth=1  → 2× (the duality layer)
+        depth=2  → 4× (convergence begins)
+        depth=3  → 8× (first triad complete)
+        ...
+        depth=255 → maximum (hard ceiling from canon)
+
+        In production, each depth is a separate sub-biosphere instance,
+        not just multiplication — this is the placeholder form.
+        """
+        MAX_DEPTH = 255
+        if depth > MAX_DEPTH:
+            return 0.0
+        if depth < 0:
+            return transaction.amount
+        return transaction.amount * (2 ** depth)
+
     def report(self) -> str:
         s = self.status()
         def pad(v, w=18): return str(v)[:w].ljust(w)
@@ -785,7 +871,7 @@ class Biosphere:
 
 
 # ─────────────────────────────────────────────────────
-# 8. CLI
+# 9. CLI
 # ─────────────────────────────────────────────────────
 
 def _fmt_result(r: Dict[str, Any]) -> str:
@@ -903,6 +989,11 @@ def cli():
     # demo
     sub.add_parser("demo", help="Run the 4-test + URP demo")
 
+    # spark
+    sp = sub.add_parser("spark", help="Generate a Spark mirror declaration for an intent")
+    sp.add_argument("intent", nargs="?", default="query", help="The intent to mirror")
+    sp.add_argument("--confirm", default="",              help="Y to confirm and proceed")
+
     # urp
     u = sub.add_parser("urp", help="Universal Restitution Protocol calculator")
     u.add_argument("--company",      required=True)
@@ -947,6 +1038,13 @@ def cli():
 
     elif args.command == "demo":
         run_demo(bio)
+
+    elif args.command == "spark":
+        mirror = Spark.mirror_query(args.intent)
+        print(json.dumps(mirror, indent=2))
+        if args.confirm:
+            confirmed = Spark.require_currency_check(args.confirm)
+            print(f"\nCobalt closure: {'Y — confirmed, engine may proceed.' if confirmed else 'N — not confirmed.'}")
 
     elif args.command == "urp":
         result = URP.calculate(
