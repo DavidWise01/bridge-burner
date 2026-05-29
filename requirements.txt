@@ -1,0 +1,7 @@
+# BIOSPHERE v2.0 — Pure stdlib. No dependencies.
+# Python 3.9+
+#
+# Modules used: hashlib, json, time, argparse, pathlib, dataclasses, typing, enum
+#
+# Optional (server mode, install separately if needed):
+# flask>=3.0.0

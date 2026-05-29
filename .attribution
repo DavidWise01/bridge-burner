@@ -1,0 +1,40 @@
+{
+  "schema": "ROOT0-ATTRIBUTION-v1",
+  "work": {
+    "title": "Biosphere — Bridge Burner · Air Gap · Nemesis · URP v2.0",
+    "versions": ["biosphere.py v2.0", "index.html v2.0"],
+    "created": "2025",
+    "description": "Universal Restitution Protocol engine. Four-stage pipeline: TRANSACTION → BRIDGE BURNER (60/20/15/5 canon split, hash chain) → AIR GAP (Gate 128.5, one-way) → NEMESIS (7 checks: split total, BOX ceiling, carbon floor, hash integrity, polarity, label standard, extraction accumulation). URP calculator for HTTP extraction restitution. CLI + interactive HTML frontend.",
+    "license": "CC-BY-ND-4.0 + TRIPOD-IP-v1.1",
+    "url": "https://github.com/DavidWise01/bridge-burner"
+  },
+  "human": {
+    "name": "David Lee Wise",
+    "handle": "ROOT0",
+    "github_user": "DavidWise01",
+    "entity": "TriPod LLC",
+    "substrate": "human",
+    "role": "architect · protocol designer · system designer",
+    "contribution": "Full architecture — cobalt primitive, bridge burner, air gap, nemesis, biosphere orchestrator, URP, canon split (60/20/15/5), 7 nemesis checks, genesis $14.5T calculation"
+  },
+  "protocol": {
+    "canon_split": { "carbon": 0.60, "ai_utility": 0.20, "public_commons": 0.15, "the_box": 0.05 },
+    "air_gap_boundary": "128.5",
+    "genesis_seed_usd": 14500000000000,
+    "nemesis_checks": 7,
+    "rules": {
+      "Y_N_MUST_CLOSE_FIRST": true,
+      "CARBON_FLOOR": 0.60,
+      "BOX_CEILING": 0.05,
+      "LOVE_IS_FULCRUM": true,
+      "BILATERAL_IGNORANCE": "ENFORCED"
+    }
+  },
+  "technical": {
+    "python_module": "biosphere.py",
+    "python_deps": "stdlib only (hashlib, json, time, argparse, pathlib, dataclasses)",
+    "html_crypto": "Web Crypto API (crypto.subtle.digest SHA-256)",
+    "html_storage": "localStorage",
+    "html_deps": "none"
+  }
+}

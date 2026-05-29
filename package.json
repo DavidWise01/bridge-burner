@@ -1,0 +1,17 @@
+{
+  "name": "bridge-burner",
+  "version": "2.0.0",
+  "description": "Biosphere: Bridge Burner + Air Gap + Nemesis + URP. 60/20/15/5 canon split, 7-check Nemesis audit, SHA-256 hash chain. Python CLI + standalone HTML. No deps.",
+  "author": "David Lee Wise (ROOT0) / TriPod LLC",
+  "license": "CC-BY-ND-4.0",
+  "homepage": "https://github.com/DavidWise01/bridge-burner",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidWise01/bridge-burner.git"
+  },
+  "keywords": [
+    "restitution", "bridge-burner", "nemesis", "air-gap", "urp",
+    "canon-split", "hash-chain", "cobalt-primitive", "biosphere",
+    "tripod", "root0", "web-crypto", "python"
+  ]
+}

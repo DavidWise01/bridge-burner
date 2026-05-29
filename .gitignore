@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+*.swp
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+restitution_ledger/
+*.jsonl
+node_modules/
