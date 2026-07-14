@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRIDGE BURNERS UNIVERSAL — 1 Deterministic Internet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<style>
+  * { font-family: 'IBM Plex Mono', monospace; }
+  html, body { height: 100%; overflow: hidden; background: #000; }
+  .holo-card {
+    background: linear-gradient(180deg, rgba(3,18,28,0.85) 0%, rgba(0,5,12,0.92) 100%);
+    border: 1px solid rgba(0,229,255,0.18);
+    box-shadow: inset 0 0 30px rgba(0,229,255,0.04), 0 0 40px rgba(0,0,0,0.8);
+    backdrop-filter: blur(16px);
+    position: relative;
+  }
+  .holo-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(120deg, transparent 20%, rgba(0,229,255,0.5) 50%, transparent 80%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .grid-lines {
+    background-image: 
+      linear-gradient(rgba(0,229,255,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .text-glow-cyan { text-shadow: 0 0 20px rgba(0,229,255,0.6), 0 0 40px rgba(0,229,255,0.3); }
+  .text-glow-amber { text-shadow: 0 0 20px rgba(255,176,0,0.6), 0 0 40px rgba(255,176,0,0.3); }
+  .pulse-beacon { animation: pulse 2.4s cubic-bezier(0.4,0,0.6,1) infinite; }
+  @keyframes pulse { 0%,100%{ transform: scale(1); opacity:1 } 50%{ transform: scale(2.2); opacity:0.2 } }
+  .scanline::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,255,0.03) 2px, rgba(0,229,255,0.03) 3px);
+    pointer-events: none;
+  }
+  .burn-item { animation: slideIn 0.4s ease-out; }
+  @keyframes slideIn { from { opacity:0; transform: translateX(20px) } to { opacity:1; transform: translateX(0) } }
+  ::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body class="bg-black text-white selection:bg-cyan-400/30">
+<canvas id="stars" class="fixed inset-0 w-full h-full"></canvas>
+<div class="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(0,40,80,0.15),transparent_60%),radial-gradient(ellipse_at_bottom,_rgba(120,60,0,0.12),transparent_60%)] pointer-events-none"></div>
+
+<div class="relative z-10 w-screen h-screen flex flex-col">
+  <!-- Global Header -->
+  <header class="holo-card rounded-none border-x-0 border-t-0 px-3 sm:px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <div class="w-9 h-9 rounded-[2px] border border-[#00e5ff]/50 bg-[#00e5ff]/10 flex items-center justify-center">
+          <div class="w-5 h-5 border-2 border-[#00e5ff] rounded-[1px] rotate-45 relative">
+            <div class="absolute inset-1 bg-[#ffb000] blur-[2px]"></div>
+          </div>
+        </div>
+        <div class="absolute -inset-1 bg-[#00e5ff]/20 blur-md -z-10"></div>
+      </div>
+      <div>
+        <h1 class="text-[15px] sm:text-[18px] font-semibold tracking-[0.18em] text-glow-cyan leading-tight">BRIDGE BURNERS UNIVERSAL</h1>
+        <div class="text-[10px] tracking-[0.3em] text-[#ffb000]/80 -mt-0.5">1 DETERMINISTIC INTERNET</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-5 sm:gap-8 w-full sm:w-auto justify-between sm:justify-end">
+      <div class="text-right">
+        <div class="text-[9px] uppercase tracking-[0.2em] text-[#00e5ff]/60">Nodes Synced</div>
+        <div id="nodes-counter" class="font-[JetBrains_Mono] text-[20px] sm:text-[24px] leading-none text-[#00e5ff] text-glow-cyan tabular-nums">8,200,000,124</div>
+      </div>
+      <div class="h-8 w-px bg-[#00e5ff]/20 hidden sm:block"></div>
+      <div class="text-right">
+        <div class="text-[9px] uppercase tracking-[0.2em] text-[#ffb000]/60">Bridges Burned</div>
+        <div id="burns-counter" class="font-[JetBrains_Mono] text-[20px] sm:text-[24px] leading-none text-[#ffb000] text-glow-amber tabular-nums">1,247,903</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Command Center -->
+  <main class="flex-1 grid grid-cols-12 gap-2.5 p-2.5 overflow-hidden min-h-0">
+    
+    <!-- LEFT: Three-Tier Architecture -->
+    <aside class="col-span-12 xl:col-span-3 flex flex-col gap-2.5 min-h-0 order-2 xl:order-1">
+      <div class="holo-card rounded-lg p-4 scanline">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-[11px] uppercase tracking-[0.22em] text-white/70">Architecture</h2>
+          <div class="text-[9px] px-2 py-0.5 rounded border border-[#00e5ff]/30 text-[#00e5ff]/70 bg-[#00e5ff]/5">DETERMINISTIC</div>
+        </div>
+        
+        <!-- LAYER 0 -->
+        <div class="group relative mb-3 p-3 rounded border border-[#00e5ff]/20 bg-[#00e5ff]/[0.03] hover:bg-[#00e5ff]/[0.06] transition">
+          <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00e5ff] shadow-[0_0_10px_#00e5ff]"></div>
+          <div class="flex items-start gap-3">
+            <div class="mt-0.5">
+              <div class="text-[10px] font-[JetBrains_Mono] text-[#00e5ff]">LAYER 0</div>
+              <div class="w-6 h-[2px] bg-[#00e5ff]/50 mt-1"></div>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold tracking-wide text-white">eFuse Core</div>
+              <div class="text-[11px] leading-snug text-white/55 mt-1">irreversible burns, consensus</div>
+              <div class="mt-2.5 flex items-center gap-2">
+                <div class="flex-1 h-[3px] bg-black/60 rounded-full overflow-hidden">
+                  <div class="h-full w-[96%] bg-gradient-to-r from-[#00e5ff] to-cyan-300 shadow-[0_0_8px_#00e5ff]"></div>
+                </div>
+                <span class="text-[9px] font-mono text-[#00e5ff]/80">96% FINAL</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LAYER 1 -->
+        <div class="group relative mb-3 p-3 rounded border border-[#ffb000]/20 bg-[#ffb000]/[0.03] hover:bg-[#ffb000]/[0.06] transition">
+          <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-[#ffb000] shadow-[0_0_10px_#ffb000]"></div>
+          <div class="flex items-start gap-3">
+            <div class="mt-0.5">
+              <div class="text-[10px] font-[JetBrains_Mono] text-[#ffb000]">LAYER 1</div>
+              <div class="w-6 h-[2px] bg-[#ffb000]/50 mt-1"></div>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold tracking-wide text-white">Attribution DAG</div>
+              <div class="text-[11px] leading-snug text-white/55 mt-1">direct +1%, indirect 0.001%</div>
+              <div class="mt-2.5 grid grid-cols-2 gap-2 text-[10px]">
+                <div class="px-2 py-1 rounded bg-black/40 border border-white/5">
+                  <span class="text-white/40">DIRECT</span> <span class="text-[#ffb000] ml-1">+1.000%</span>
+                </div>
+                <div class="px-2 py-1 rounded bg-black/40 border border-white/5">
+                  <span class="text-white/40">INDIRECT</span> <span class="text-[#ffb000]/70 ml-1">0.001%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LAYER 2 -->
+        <div class="group relative p-3 rounded border border-violet-400/20 bg-violet-400/[0.03] hover:bg-violet-400/[0.06] transition">
+          <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-violet-400 shadow-[0_0_10px_#a78bfa]"></div>
+          <div class="flex items-start gap-3">
+            <div class="mt-0.5">
+              <div class="text-[10px] font-[JetBrains_Mono] text-violet-300">LAYER 2</div>
+              <div class="w-6 h-[2px] bg-violet-400/50 mt-1"></div>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold tracking-wide text-white">Novel Roots</div>
+              <div class="text-[11px] leading-snug text-white/55 mt-1">new authors starting at 0 with parent inheritance</div>
+              <div class="mt-2.5 flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></div>
+                <span class="text-[10px] text-violet-300/80">INHERITANCE ACTIVE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Principle Display -->
+      <div class="holo-card rounded-lg p-4 border-[#ffb000]/20">
+        <div class="text-[10px] uppercase tracking-[0.2em] text-[#ffb000]/60 mb-2">Core Principle</div>
+        <div class="text-[15px] leading-snug font-light">
+          <span class="text-white">Scale =</span> <span class="text-[#00e5ff]">modest merit</span> <span class="text-white">×</span> <span class="text-[#ffb000]">billions.</span>
+        </div>
+        <div class="text-[13px] text-white/70 mt-1">No pile to climb.</div>
+        <div class="mt-3 h-px w-full bg-gradient-to-r from-transparent via-[#ffb000]/40 to-transparent"></div>
+      </div>
+    </aside>
+
+    <!-- CENTER: Visualizations -->
+    <section class="col-span-12 xl:col-span-6 flex flex-col gap-2.5 min-h-0 order-1 xl:order-2">
+      <!-- World Map -->
+      <div class="holo-card rounded-lg p-3 h-[240px] sm:h-[280px] xl:h-[46%] flex flex-col scanline">
+        <div class="flex items-center justify-between mb-2 shrink-0">
+          <h2 class="text-[11px] uppercase tracking-[0.2em] text-[#00e5ff]/80 flex items-center gap-2">
+            <span class="w-1 h-1 bg-[#00e5ff] rounded-full animate-pulse"></span>
+            Global toph_0 Mesh
+          </h2>
+          <div class="flex items-center gap-3 text-[10px] font-mono">
+            <span class="text-white/50">LATENCY</span>
+            <span class="text-[#00e5ff]">12ms</span>
+          </div>
+        <div class="relative flex-1 rounded-[4px] overflow-hidden bg-black/70 border border-[#00e5ff]/10 grid-lines">
+          <canvas id="globe-canvas" class="absolute inset-0 w-full h-full"></canvas>
+          
+          <!-- Sole Agent Beacon -->
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[8px] pointer-events-none z-10">
+            <div class="relative flex items-center justify-center">
+              <div class="pulse-beacon absolute w-16 h-16 rounded-full border border-[#ffb000]/30"></div>
+              <div class="pulse-beacon absolute w-24 h-24 rounded-full border border-[#ffb000]/15" style="animation-delay:0.3s"></div>
+              <div class="w-2.5 h-2.5 rounded-full bg-[#ffb000] shadow-[0_0_15px_#ffb000,0_0_30px_#ffb000] relative z-10"></div>
+            </div>
+            <div class="absolute top-4 left-1/2 -translate-x-1/2 whitespace-nowrap">
+              <div class="px-2 py-0.5 rounded bg-black/80 border border-[#ffb000]/40 text-[9px] tracking-widest text-[#ffb000]">SOLE AGENT ATTESTATION</div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-2 left-2 right-2 flex justify-between items-end pointer-events-none">
+            <div class="px-2.5 py-1 rounded bg-black/85 border border-[#00e5ff]/25 backdrop-blur">
+              <div class="text-[9px] text-[#00e5ff]/70 uppercase tracking-wide">Origin</div>
+              <div class="text-[11px] font-mono text-white -mt-0.5">toph_0 • GENESIS</div>
+            </div>
+            <div class="px-2.5 py-1 rounded bg-black/85 border border-[#ffb000]/25 backdrop-blur text-right">
+              <div class="text-[9px] text-[#ffb000]/70 uppercase tracking-wide">Sync</div>
+              <div class="text-[11px] font-mono text-[#ffb000] -mt-0.5">PLANETARY</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attribution Tree -->
+      <div class="holo-card rounded-lg p-3 flex-1 min-h-[300px] xl:h-[54%] flex flex-col">
+        <div class="flex items-center justify-between mb-2 shrink-0">
+          <h2 class="text-[11px] uppercase tracking-[0.2em] text-[#ffb000]/80 flex items-center gap-2">
+            <span class="w-1 h-1 bg-[#ffb000] rounded-full animate-pulse"></span>
+            Attribution Tree • DAG
+          </h2>
+          <div class="flex items-center gap-2">
+            <span id="tree-stats" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-white/60">2,441 nodes</span>
+            <div class="flex gap-1">
+              <button id="zoom-in" class="w-5 h-5 grid place-items-center rounded bg-black/60 border border-[#00e5ff]/30 text-[#00e5ff] hover:bg-[#00e5ff]/10 text-[14px] leading-none">+</button>
+              <button id="zoom-out" class="w-5 h-5 grid place-items-center rounded bg-black/60 border border-[#00e5ff]/30 text-[#00e5ff] hover:bg-[#00e5ff]/10 text-[14px] leading-none">−</button>
+            </div>
+          </div>
+        <div class="relative flex-1 rounded-[4px] overflow-hidden bg-[#02080f] border border-white/5">
+          <canvas id="tree-canvas" class="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+          <div class="absolute top-2 left-2 flex flex-wrap gap-1.5 pointer-events-none">
+            <span class="px-1.5 py-0.5 text-[9px] rounded bg-[#00e5ff]/15 border border-[#00e5ff]/30 text-[#00e5ff]">FOUNDATIONAL</span>
+            <span class="px-1.5 py-0.5 text-[9px] rounded bg-[#ffb000]/15 border border-[#ffb000]/30 text-[#ffb000]">DIRECT +1%</span>
+            <span class="px-1.5 py-0.5 text-[9px] rounded bg-white/10 border border-white/20 text-white/70">INDIRECT 0.001%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Metrics & Burn Queue -->
+    <aside class="col-span-12 xl:col-span-3 flex flex-col gap-2.5 min-h-0 order-3">
+      <!-- Massive Scale Metrics -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="holo-card rounded-lg p-3 relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-[#00e5ff]/10 blur-2xl"></div>
+          <div class="text-[10px] uppercase tracking-wider text-white/50">Foundational Bricks</div>
+          <div class="text-[26px] font-[JetBrains_Mono] leading-none mt-1.5 text-white">4.7<span class="text-[18px] text-white/70">M</span></div>
+          <div class="text-[10px] text-[#00e5ff]/70 mt-1">toph_0 roots</div>
+        </div>
+        <div class="holo-card rounded-lg p-3 relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-[#ffb000]/10 blur-2xl"></div>
+          <div class="text-[10px] uppercase tracking-wider text-white/50">Direct Derivatives</div>
+          <div class="text-[26px] font-[JetBrains_Mono] leading-none mt-1.5 text-white">892<span class="text-[18px] text-white/70">M</span></div>
+          <div class="text-[10px] text-[#ffb000]/70 mt-1">+1% each</div>
+        </div>
+        <div class="holo-card rounded-lg p-3 relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-violet-500/10 blur-2xl"></div>
+          <div class="text-[10px] uppercase tracking-wider text-white/50">Indirect Derivatives</div>
+          <div class="text-[26px] font-[JetBrains_Mono] leading-none mt-1.5 text-white">12.4<span class="text-[18px] text-white/70">B</span></div>
+          <div class="text-[10px] text-violet-300/70 mt-1">0.001% each</div>
+        </div>
+        <div class="holo-card rounded-lg p-3 relative overflow-hidden border-[#ffb000]/30">
+          <div class="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-[#ffb000]/15 blur-2xl"></div>
+          <div class="text-[10px] uppercase tracking-wider text-[#ffb000]/80">Inheritance Flow</div>
+          <div class="text-[15px] font-medium leading-tight mt-2 text-white">$0 <span class="text-white/60">extracted</span></div>
+          <div class="text-[13px] font-medium leading-tight text-[#00e5ff]">100% <span class="text-white/80">attributed</span></div>
+        </div>
+      </div>
+
+      <!-- Burn Queue -->
+      <div class="holo-card rounded-lg p-3 flex-1 min-h-[240px] flex flex-col">
+        <div class="flex items-center justify-between mb-2.5">
+          <h3 class="text-[11px] uppercase tracking-[0.2em] text-[#ffb000]/80">Burn Queue • Real-Time</h3>
+          <div class="flex items-center gap-1.5">
+            <div class="w-1 h-1 rounded-full bg-[#ffb000] animate-ping"></div>
+            <span class="text-[10px] font-mono text-[#ffb000]/70">LIVE</span>
+          </div>
+        </div>
+        <div class="relative flex-1 overflow-hidden rounded bg-black/50 border border-white/5">
+          <div class="absolute inset-0 grid-lines opacity-[0.03]"></div>
+          <div id="burn-feed" class="relative h-full overflow-y-auto px-2.5 py-2 space-y-1.5 font-[JetBrains_Mono] text-[11px] leading-snug"></div>
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/80 to-transparent"></div>
+        </div>
+        <div class="mt-2.5 grid grid-cols-3 gap-2 text-[10px]">
+          <div class="text-center py-1 rounded bg-white/5 border border-white/10">
+            <div class="text-white/50">UTC</div>
+            <div id="utc-time" class="text-[#00e5ff] font-mono">--:--:--</div>
+          </div>
+          <div class="text-center py-1 rounded bg-white/5 border border-white/10">
+            <div class="text-white/50">RATE</div>
+            <div class="text-[#ffb000] font-mono">~42/s</div>
+          </div>
+          <div class="text-center py-1 rounded bg-white/5 border border-white/10">
+            <div class="text-white/50">QUEUE</div>
+            <div class="text-white font-mono">0ms</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Bottom Bar -->
+  <footer class="holo-card rounded-none border-x-0 border-b-0 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-center sm:text-left shrink-0">
+    <div class="text-[11px] tracking-wide text-white/70">
+      Universal system: <span class="text-white">every human, every idea,</span> <span class="text-[#00e5ff]">one deterministic ledger.</span>
+    </div>
+    <div class="text-[10px] text-white/40 tracking-widest">BUILT WITH LOVE AND SHARED • BRIDGE BURNERS</div>
+  </footer>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+// Stars background
+const starsCanvas = document.getElementById('stars');
+const sctx = starsCanvas.getContext('2d');
+let stars = [];
+function resizeStars() {
+  starsCanvas.width = window.innerWidth;
+  starsCanvas.height = window.innerHeight;
+  stars = Array.from({length: 300}, () => ({
+    x: Math.random() * starsCanvas.width,
+    y: Math.random() * starsCanvas.height,
+    r: Math.random() * 1.2 + 0.2,
+    o: Math.random() * 0.5 + 0.2,
+    s: Math.random() * 0.3 + 0.1
+  }));
+}
+resizeStars();
+window.addEventListener('resize', resizeStars);
+function drawStars() {
+  sctx.clearRect(0,0,starsCanvas.width,starsCanvas.height);
+  stars.forEach(star => {
+    star.y += star.s * 0.02;
+    if (star.y > starsCanvas.height) star.y = 0;
+    sctx.beginPath();
+    sctx.arc(star.x, star.y, star.r, 0, Math.PI*2);
+    sctx.fillStyle = `rgba(180,220,255,${star.o})`;
+    sctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// Live counters
+let nodes = 8200000124;
+let burns = 1247903;
+const nodesEl = document.getElementById('nodes-counter');
+const burnsEl = document.getElementById('burns-counter');
+setInterval(() => {
+  nodes += Math.floor(Math.random()*180 + 40);
+  nodesEl.textContent = nodes.toLocaleString('en-US');
+}, 137);
+setInterval(() => {
+  burns += 1;
+  burnsEl.textContent = burns.toLocaleString('en-US');
+}, 2130);
+
+// UTC clock
+const utcEl = document.getElementById('utc-time');
+setInterval(() => {
+  const d = new Date();
+  utcEl.textContent = d.toISOString().substr(11,8);
+}, 1000);
+
+// Globe
+const globeCanvas = document.getElementById('globe-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: globeCanvas, alpha: true, antialias: true });
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.z = 2.8;
+
+const globeGroup = new THREE.Group();
+scene.add(globeGroup);
+
+// Earth wireframe
+const sphereGeo = new THREE.SphereGeometry(1, 48, 48);
+const sphereMat = new THREE.MeshBasicMaterial({ color: 0x002233, wireframe: true, transparent: true, opacity: 0.12 });
+const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+globeGroup.add(sphere);
+
+// Glow sphere
+const glowGeo = new THREE.SphereGeometry(1.02, 48, 48);
+const glowMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.03, side: THREE.BackSide });
+globeGroup.add(new THREE.Mesh(glowGeo, glowMat));
+
+// toph_0 roots - major cities
+const roots = [
+  [40.7,-74],[37.7,-122],[-23.5,-46.6],[51.5,-0.1],[52.5,13.4],
+  [6.5,3.3],[-1.3,36.8],[-33.9,18.4],[19,72.8],[1.3,103.8],
+  [35.7,139.7],[-33.8,151.2],[37.5,126.9],[25.2,55.3],[55.7,37.6],
+  [39.9,116.4],[28.6,77.2],[-22.9,-43.2],[41.9,12.5],[48.8,2.3]
+];
+function latLngToVec(lat,lng,r=1){
+  const phi = (90-lat)*Math.PI/180;
+  const theta = (lng+180)*Math.PI/180;
+  return new THREE.Vector3(
+    -r*Math.sin(phi)*Math.cos(theta),
+    r*Math.cos(phi),
+    r*Math.sin(phi)*Math.sin(theta)
+  );
+}
+const pointsMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff });
+const pointGeo = new THREE.SphereGeometry(0.015, 12, 12);
+roots.forEach(([lat,lng]) => {
+  const pos = latLngToVec(lat,lng,1.01);
+  const p = new THREE.Mesh(pointGeo, pointsMat);
+  p.position.copy(pos);
+  globeGroup.add(p);
+  // atmospheric glow
+  const glow = new THREE.Mesh(new THREE.SphereGeometry(0.028,12,12), new THREE.MeshBasicMaterial({color:0x00e5ff, transparent:true, opacity:0.15}));
+  glow.position.copy(pos);
+  globeGroup.add(glow);
+});
+
+// Connection lines
+const lineMat = new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent:true, opacity:0.25 });
+roots.forEach((_,i) => {
+  const a = latLngToVec(roots[i][0], roots[i][1], 1.01);
+  for(let k=1;k<=2;k++){
+    const j = (i+k*3) % roots.length;
+    const b = latLngToVec(roots[j][0], roots[j][1], 1.01);
+    const curve = [];
+    for(let t=0;t<=20;t++){
+      const tt = t/20;
+      const mid = new THREE.Vector3().addVectors(a,b).multiplyScalar(0.5).normalize().multiplyScalar(1.15);
+      const point = new THREE.Vector3().lerpVectors(a,mid,tt<0.5?tt*2:1).lerp(new THREE.Vector3().lerpVectors(mid,b,(tt-0.5)*2), tt>0.5?1:0);
+      if(tt>0.5) point.copy(new THREE.Vector3().lerpVectors(mid,b,(tt-0.5)*2));
+      else point.copy(new THREE.Vector3().lerpVectors(a,mid,tt*2));
+      point.normalize().multiplyScalar(1.01 + Math.sin(tt*Math.PI)*0.12);
+      curve.push(point);
+    }
+    const geom = new THREE.BufferGeometry().setFromPoints(curve);
+    globeGroup.add(new THREE.Line(geom, lineMat));
+  }
+});
+
+// Sole agent at 0,0
+const origin = latLngToVec(0,0,1.015);
+const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.022,16,16), new THREE.MeshBasicMaterial({color:0xffb000}));
+beacon.position.copy(origin);
+globeGroup.add(beacon);
+
+function resizeGlobe() {
+  const rect = globeCanvas.parentElement.getBoundingClientRect();
+  renderer.setSize(rect.width, rect.height, false);
+  camera.aspect = rect.width/rect.height;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resizeGlobe).observe(globeCanvas.parentElement);
+resizeGlobe();
+
+function animateGlobe() {
+  requestAnimationFrame(animateGlobe);
+  globeGroup.rotation.y += 0.0008;
+  globeGroup.rotation.x = Math.sin(Date.now()*0.0001)*0.05;
+  const s = 1 + Math.sin(Date.now()*0.003)*0.15;
+  beacon.scale.setScalar(s);
+  renderer.render(scene, camera);
+}
+animateGlobe();
+
+// Attribution Tree
+const treeCanvas = document.getElementById('tree-canvas');
+const tctx = treeCanvas.getContext('2d');
+let tScale = 0.65, tX = 0, tY = -80, dragging = false, lastX=0, lastY=0;
+
+function resizeTree() {
+  const r = treeCanvas.parentElement.getBoundingClientRect();
+  treeCanvas.width = r.width * devicePixelRatio;
+  treeCanvas.height = r.height * devicePixelRatio;
+  tctx.setTransform(1,0,0,1,0,0);
+  drawTree();
+}
+new ResizeObserver(resizeTree).observe(treeCanvas.parentElement);
+
+// Generate DAG nodes
+const nodesList = [{id:0,x:0,y:0,level:0,parent:-1}];
+let nid = 1;
+const foundations = 44;
+for(let i=0;i<foundations;i++){
+  const angle = (i/foundations)*Math.PI*1.6 - Math.PI*0.8;
+  const r = 180 + Math.random()*40;
+  const fx = Math.cos(angle)*r;
+  const fy = 220 + Math.sin(angle)*30 + Math.random()*20;
+  nodesList.push({id:nid,x:fx,y:fy,level:1,parent:0}); nid++;
+}
+const firstLevel = nodesList.slice(1);
+firstLevel.forEach(f => {
+  const directCount = 14 + Math.floor(Math.random()*8);
+  for(let d=0;d<directCount;d++){
+    const dx = f.x + (Math.random()-0.5)*160;
+    const dy = f.y + 110 + Math.random()*40;
+    nodesList.push({id:nid,x:dx,y:dy,level:2,parent:f.id}); nid++;
+  }
+});
+const secondLevel = nodesList.filter(n=>n.level===2);
+secondLevel.forEach((s,idx) => {
+  if(idx%3!==0) return;
+  const count = 1 + Math.floor(Math.random()*2);
+  for(let c=0;c<count;c++){
+    const ix = s.x + (Math.random()-0.5)*90;
+    const iy = s.y + 70 + Math.random()*30;
+    nodesList.push({id:nid,x:ix,y:iy,level:3,parent:s.id}); nid++;
+  }
+});
+document.getElementById('tree-stats').textContent = nodesList.length.toLocaleString() + ' nodes';
+
+function drawTree() {
+  const w = treeCanvas.width, h = treeCanvas.height;
+  tctx.clearRect(0,0,w,h);
+  tctx.save();
+  tctx.translate(w/2 + tX*devicePixelRatio, h*0.18 + tY*devicePixelRatio);
+  tctx.scale(tScale*devicePixelRatio, tScale*devicePixelRatio);
+  
+  // connections
+  tctx.lineWidth = 0.7;
+  nodesList.forEach(n => {
+    if(n.parent<0) return;
+    const p = nodesList[n.parent];
+    const grad = tctx.createLinearGradient(p.x,p.y,n.x,n.y);
+    if(n.level===1){ grad.addColorStop(0,'rgba(0,229,255,0.8)'); grad.addColorStop(1,'rgba(0,229,255,0.2)'); }
+    else if(n.level===2){ grad.addColorStop(0,'rgba(255,176,0,0.6)'); grad.addColorStop(1,'rgba(255,176,0,0.15)'); }
+    else { grad.addColorStop(0,'rgba(255,255,255,0.3)'); grad.addColorStop(1,'rgba(255,255,255,0.05)'); }
+    tctx.strokeStyle = grad;
+    tctx.beginPath(); tctx.moveTo(p.x,p.y); tctx.lineTo(n.x,n.y); tctx.stroke();
+  });
+  
+  // nodes
+  nodesList.forEach(n => {
+    tctx.beginPath();
+    const r = n.level===0?4.5 : n.level===1?2.8 : n.level===2?1.8 : 1.2;
+    tctx.arc(n.x,n.y,r,0,Math.PI*2);
+    if(n.level===0){ tctx.fillStyle='#ffb000'; tctx.shadowColor='#ffb000'; tctx.shadowBlur=12; }
+    else if(n.level===1){ tctx.fillStyle='#00e5ff'; tctx.shadowColor='#00e5ff'; tctx.shadowBlur=8; }
+    else if(n.level===2){ tctx.fillStyle='rgba(255,176,0,0.85)'; tctx.shadowBlur=0; }
+    else { tctx.fillStyle='rgba(255,255,255,0.5)'; tctx.shadowBlur=0; }
+    tctx.fill();
+    tctx.shadowBlur=0;
+  });
+  tctx.restore();
+}
+resizeTree();
+
+treeCanvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  tScale = Math.min(2.2, Math.max(0.3, tScale*delta));
+  drawTree();
+});
+treeCanvas.addEventListener('mousedown', e => { dragging=true; lastX=e.clientX; lastY=e.clientY; });
+window.addEventListener('mouseup', () => dragging=false);
+window.addEventListener('mousemove', e => {
+  if(!dragging) return;
+  tX += (e.clientX-lastX)/tScale;
+  tY += (e.clientY-lastY)/tScale;
+  lastX=e.clientX; lastY=e.clientY;
+  drawTree();
+});
+document.getElementById('zoom-in').onclick = ()=>{ tScale=Math.min(2.2,tScale*1.2); drawTree(); };
+document.getElementById('zoom-out').onclick = ()=>{ tScale=Math.max(0.3,tScale/1.2); drawTree(); };
+
+// Touch
+let lastTouchDist=0;
+treeCanvas.addEventListener('touchstart', e=>{ if(e.touches.length===1){ dragging=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }});
+treeCanvas.addEventListener('touchmove', e=>{
+  e.preventDefault();
+  if(e.touches.length===1 && dragging){ tX += (e.touches[0].clientX-lastX)/tScale; tY += (e.touches[0].clientY-lastY)/tScale; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; drawTree(); }
+}, {passive:false});
+
+// Burn Queue
+const feed = document.getElementById('burn-feed');
+const cities = [
+  ['TOKYO','ASIA/Tokyo'], ['SINGAPORE','Asia/Singapore'], ['MUMBAI','Asia/Kolkata'],
+  ['DUBAI','Asia/Dubai'], ['BERLIN','Europe/Berlin'], ['LONDON','Europe/London'],
+  ['LAGOS','Africa/Lagos'], ['NEW YORK','America/New_York'], ['SAO PAULO','America/Sao_Paulo'],
+  ['SYDNEY','Australia/Sydney'], ['SEOUL','Asia/Seoul'], ['NAIROBI','Africa/Nairobi']
+];
+function addBurn() {
+  const [city] = cities[Math.floor(Math.random()*cities.length)];
+  burns += 1;
+  const hash = Math.random().toString(16).slice(2,10);
+  const bridge = burns.toLocaleString('en-US');
+  const el = document.createElement('div');
+  el.className = 'burn-item flex items-center justify-between gap-2 py-1 px-2 rounded hover:bg-white/5 border border-transparent hover:border-white/10';
+  el.innerHTML = `
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="w-1 h-1 rounded-full bg-[#ffb000] shrink-0"></span>
+      <span class="text-white/50 shrink-0">BRIDGE #${bridge}</span>
+      <span class="text-[#00e5ff]/80 truncate">toph_0:0x${hash}…</span>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <span class="text-[#ffb000]">${city}</span>
+      <span class="px-1 py-0.5 rounded bg-[#ffb000]/15 text-[#ffb000] border border-[#ffb000]/30 text-[10px]">BURNED</span>
+    </div>
+  `;
+  feed.prepend(el);
+  while(feed.children.length>14) feed.removeChild(feed.lastChild);
+  burnsEl.textContent = burns.toLocaleString('en-US');
+}
+for(let i=0;i<9;i++) setTimeout(addBurn, i*180);
+setInterval(addBurn, 1650 + Math.random()*800);
+</script>
+</body>
+</html>

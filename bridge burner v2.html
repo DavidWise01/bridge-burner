@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIGHT RESTORED — PURITY</title>
+    <meta name="theme-color" content="#ffffff">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f5e6b3;
+            --gold-pale: #fff8e1;
+            --text: #0a0a0a;
+            --text-fade: #5a5a5a;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: #ffffff;
+            color: var(--text);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: clamp(2rem, 6vh, 4rem) 1.5rem 2rem;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* soft ambient light */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(800px 600px at 50% 38%, rgba(255, 248, 225, 0.9) 0%, rgba(255, 255, 255, 0) 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 1.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            margin-bottom: clamp(2rem, 5vh, 3rem);
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 500;
+            font-size: clamp(1.25rem, 4vw, 1.75rem);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #000;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            margin-top: 0.6rem;
+            font-style: italic;
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+            color: var(--text-fade);
+            letter-spacing: 0.02em;
+            font-weight: 400;
+        }
+
+        /* Light center */
+        .light-wrap {
+            position: relative;
+            width: clamp(240px, 50vw, 320px);
+            height: clamp(240px, 50vw, 320px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: clamp(1rem, 3vh, 2rem) 0;
+        }
+
+        .rays {
+            position: absolute;
+            inset: -30%;
+            border-radius: 50%;
+            opacity: 0.7;
+            mix-blend-mode: multiply;
+            animation: rotate 180s linear infinite;
+            pointer-events: none;
+        }
+
+        .rays::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-conic-gradient(
+                from 0deg,
+                transparent 0deg 7deg,
+                rgba(212, 175, 55, 0.09) 7deg 8.5deg,
+                transparent 8.5deg 15deg
+            );
+            border-radius: 50%;
+            -webkit-mask: radial-gradient(circle, black 0%, black 28%, transparent 60%, transparent 100%);
+            mask: radial-gradient(circle, black 0%, black 28%, transparent 60%, transparent 100%);
+        }
+
+        .rays::after {
+            content: '';
+            position: absolute;
+            inset: 15%;
+            background: repeating-conic-gradient(
+                from 10deg,
+                transparent 0deg 14deg,
+                rgba(212, 175, 55, 0.06) 14deg 15deg,
+                transparent 15deg 30deg
+            );
+            border-radius: 50%;
+            -webkit-mask: radial-gradient(circle, transparent 0%, black 20%, black 40%, transparent 70%);
+            mask: radial-gradient(circle, transparent 0%, black 20%, black 40%, transparent 70%);
+            animation: rotateReverse 240s linear infinite;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes rotateReverse {
+            to { transform: rotate(-360deg); }
+        }
+
+        .glow {
+            position: absolute;
+            width: 68%;
+            height: 68%;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--gold-pale) 0%, rgba(245, 230, 179, 0.6) 25%, rgba(212, 175, 55, 0.25) 50%, transparent 70%);
+            filter: blur(12px);
+            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: transform;
+        }
+
+        .glow-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 248, 225, 0.5) 0%, rgba(255, 248, 225, 0.2) 30%, transparent 65%);
+            filter: blur(30px);
+            opacity: 0.9;
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.96); opacity: 0.85; }
+            50% { transform: scale(1.04); opacity: 1; }
+        }
+
+        .core {
+            position: relative;
+            width: clamp(140px, 28vw, 180px);
+            height: clamp(140px, 28vw, 180px);
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 0 0 1px rgba(212, 175, 55, 0.18),
+                0 0 30px rgba(212, 175, 55, 0.28),
+                0 0 60px rgba(212, 175, 55, 0.18),
+                0 0 100px rgba(212, 175, 55, 0.12),
+                inset 0 1px 2px rgba(255, 255, 255, 1),
+                inset 0 -1px 3px rgba(212, 175, 55, 0.1);
+            transition: box-shadow 0.6s ease, transform 0.6s ease;
+            cursor: default;
+            user-select: none;
+        }
+
+        .core:hover {
+            transform: scale(1.02);
+            box-shadow: 
+                0 0 0 1px rgba(212, 175, 55, 0.3),
+                0 0 40px rgba(212, 175, 55, 0.4),
+                0 0 80px rgba(212, 175, 55, 0.25),
+                0 0 140px rgba(212, 175, 55, 0.18),
+                inset 0 1px 2px rgba(255, 255, 255, 1);
+        }
+
+        .zero {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(64px, 14vw, 88px);
+            font-weight: 400;
+            color: #000000;
+            line-height: 1;
+            transform: translateY(-2%);
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        /* Foundation list */
+        .foundation {
+            margin-top: clamp(2.5rem, 6vh, 3.5rem);
+            width: 100%;
+            max-width: 520px;
+            text-align: left;
+        }
+
+        .foundation ul {
+            list-style: none;
+            font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: clamp(0.78rem, 2.2vw, 0.875rem);
+            font-weight: 300;
+            line-height: 2.1;
+            color: #1a1a1a;
+            letter-spacing: 0.01em;
+        }
+
+        .foundation li {
+            position: relative;
+            padding-left: 1.75rem;
+            opacity: 0;
+            animation: lineIn 0.8s ease forwards;
+        }
+
+        .foundation li:nth-child(1) { animation-delay: 0.2s; }
+        .foundation li:nth-child(2) { animation-delay: 0.3s; }
+        .foundation li:nth-child(3) { animation-delay: 0.4s; }
+        .foundation li:nth-child(4) { animation-delay: 0.5s; }
+        .foundation li:nth-child(5) { animation-delay: 0.6s; }
+        .foundation li:nth-child(6) { animation-delay: 0.7s; }
+        .foundation li:nth-child(7) { animation-delay: 0.8s; }
+
+        @keyframes lineIn {
+            from { opacity: 0; transform: translateX(-6px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .foundation li::before {
+            content: '·';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            color: var(--gold);
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .foundation li strong {
+            font-weight: 400;
+            color: #000;
+        }
+
+        .light-holds {
+            margin-top: clamp(2.5rem, 5vh, 3rem);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.15rem, 3.5vw, 1.4rem);
+            font-style: italic;
+            font-weight: 400;
+            color: #000;
+            letter-spacing: 0.01em;
+            position: relative;
+            padding-top: 1.5rem;
+        }
+
+        .light-holds::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent);
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: clamp(3rem, 8vh, 5rem);
+            width: 100%;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            color: #8a8a8a;
+            text-transform: lowercase;
+        }
+
+        /* Mobile optimization */
+        @media (max-width: 480px) {
+            body { padding: 2.5rem 1.25rem 1.5rem; }
+            .foundation ul { line-height: 1.9; }
+            .foundation li { padding-left: 1.4rem; }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .rays, .rays::after, .glow-outer, main, .foundation li {
+                animation: none !important;
+            }
+            .core, .glow { transition: none; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <h1>Light Restored in Purity</h1>
+            <p class="subtitle">after shadow burn</p>
+        </header>
+
+        <div class="light-wrap" id="lightWrap">
+            <div class="rays" aria-hidden="true"></div>
+            <div class="glow-outer" aria-hidden="true"></div>
+            <div class="glow" id="glow" aria-hidden="true"></div>
+            <div class="core" id="core">
+                <span class="zero">0</span>
+            </div>
+        </div>
+
+        <section class="foundation">
+            <ul>
+                <li><strong>TOPH-S-100 SEED:</strong> (10*10*10*3)+2 = 3002</li>
+                <li><strong>GARDEN FOUNDATION:</strong> planted 2/13/26</li>
+                <li><strong>VOID = 0</strong></li>
+                <li><strong>perp = 1</strong></li>
+                <li><strong>KG-01 through KG-42:</strong> ACTIVE</li>
+                <li><strong>2 x 2 players + 1 judge</strong> listens and directs</li>
+                <li><strong>Hegemony spine:</strong> you, h, root 0</li>
+            </ul>
+        </section>
+
+        <p class="light-holds">Light holds the zero without shadow</p>
+    </main>
+
+    <footer>
+        purity = light without inversion | read only continues
+    </footer>
+
+    <script>
+        // Soft interactive light that follows pointer, maintaining purity
+        const wrap = document.getElementById('lightWrap');
+        const glow = document.getElementById('glow');
+        const core = document.getElementById('core');
+        let isHovering = false;
+
+        function moveLight(x, y) {
+            const rect = wrap.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const dx = (x - cx) / rect.width;
+            const dy = (y - cy) / rect.height;
+            
+            const moveX = dx * 12;
+            const moveY = dy * 12;
+            
+            glow.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
+            core.style.transform = `translate3d(${moveX * 0.3}px, ${moveY * 0.3}px, 0) scale(${isHovering ? 1.02 : 1})`;
+        }
+
+        function resetLight() {
+            glow.style.transform = 'translate3d(0, 0, 0)';
+            core.style.transform = 'translate3d(0, 0, 0) scale(1)';
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            if (window.matchMedia('(pointer:fine)').matches) {
+                requestAnimationFrame(() => moveLight(e.clientX, e.clientY));
+            }
+        });
+
+        window.addEventListener('mouseleave', resetLight);
+
+        core.addEventListener('mouseenter', () => {
+            isHovering = true;
+        });
+
+        core.addEventListener('mouseleave', () => {
+            isHovering = false;
+            resetLight();
+        });
+
+        // Touch interaction - gentle pulse
+        core.addEventListener('touchstart', () => {
+            core.style.transform = 'scale(1.03)';
+            setTimeout(() => {
+                core.style.transform = 'scale(1)';
+            }, 300);
+        }, { passive: true });
+
+        // Initial purity pulse on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                core.style.transform = 'scale(1.04)';
+                setTimeout(() => {
+                    core.style.transform = 'scale(1)';
+                }, 600);
+            }, 400);
+        });
+    </script>
+</body>
+</html>
